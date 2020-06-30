@@ -10,7 +10,7 @@ module.exports = {
 
   devServer: {
     // Need for Docker to work with dev server
-    host: '0.0.0.0',
+    //host: '0.0.0.0',
     port: 8080,
     contentBase: '/',
     headers: { 'Access-Control-Allow-Origin': '*' },
