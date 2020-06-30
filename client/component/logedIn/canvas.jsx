@@ -10,6 +10,7 @@ export default class Canvas extends Component {
     this.state = { color: 'black', thickness: 3 };
     this.socket = null;
     this.canvas = null;
+    this.canvasArray = [];
     this.ctx = null;
     this.fromTop = null;
     this.fromLeft = null;
@@ -24,6 +25,7 @@ export default class Canvas extends Component {
     this.draw = this.draw.bind(this);
     this.down2 = this.down2.bind(this);
     this.clearCanvas = this.clearCanvas.bind(this);
+    this.undoButton = this.undoButton.bind(this);
   }
 
   startPosition(e) {
@@ -39,6 +41,11 @@ export default class Canvas extends Component {
     this.painting = false;
     this.ctx.beginPath();
     this.localPath = new Path2D();
+
+    // creating a clone, pushing that into array
+    // continue drawing on current canvas
+    const cloneCanvas = this.canvas.cloneNode();
+    this.canvasArray.push(cloneCanvas);
     this.socket.emit('down', { down: false });
   }
   draw(e) {
@@ -50,7 +57,6 @@ export default class Canvas extends Component {
     this.ctx.stroke(this.localPath);
     this.ctx.beginPath();
     this.localPath.moveTo(e.clientX - this.fromLeft, e.clientY - this.fromTop);
-  
     const x = (e.clientX - this.fromLeft) / this.canvas.width;
     const y = (e.clientY - this.fromTop) / this.canvas.height;
 
@@ -113,12 +119,20 @@ export default class Canvas extends Component {
     if (sign === '-' && this.state.thickness > 1)
       this.setState({ ...this.state, thickness: this.state.thickness - 2 });
   }
+  undoButton() {
+    console.log('call to undo button')
+    let wrapper = document.getElementById('canvasElement');
+    wrapper.removeChild(wrapper.childNodes[0]);
+    wrapper.appendChild(this.canvasArray.pop())
+  }
 
   render() {
     return (
       <div className='canvas-page'>
         <div>
-            <canvas id="canvas" style={{ backgroundColor: 'gray' }} />
+            <div id='canvasElement'>
+              <canvas id="canvas" style={{ backgroundColor: 'gray' }} />
+            </div>
             <div className='button-div'>
             <button
               id="black"
@@ -170,6 +184,11 @@ export default class Canvas extends Component {
                 this.clearCanvas();
                 this.socket.emit('clear');
               }}>clear</button>
+            <button id="undo" onClick={() => {
+                this.undoButton();
+              }}>undo</button>
+            {/* <button id="redo" onClick={() => {
+              }}>redo</button> */}
             </div>
           </div>
         <div >
