@@ -48,7 +48,8 @@ export default class Chat extends Component {
       const message = this.state.messages[i]
         messages.push(
             <div  key={i}>
-             name:{message.name} <br/>
+             name:{message.name} 
+              <br/>
              {message.message}
             </div>
             )
@@ -61,7 +62,7 @@ export default class Chat extends Component {
                     {messages}
                     </div>
                 </div>
-              <div>
+              <div className='chatInput'>
               <input type="text" id="name" placeholder="name"/><br/>
                   {/* <label for="message">Message:</label>
                   <input type="text" id="message" name="message"/> */}
