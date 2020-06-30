@@ -64,7 +64,7 @@ function newConnection(socket) {
   // receieves mouse coordinates
   function mouseMsg(data) {
     // broadcasts data to everyone who is connected
-    console.log(data);
+    console.log('coordinates: ',data);
     socket.broadcast.emit('mouseback', data);
     // globally emit data to everyone
   }

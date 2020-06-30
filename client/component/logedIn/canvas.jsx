@@ -21,7 +21,10 @@ export default class Canvas extends Component {
     const fromTop = canvas.getBoundingClientRect().top;
     const fromLeft = canvas.getBoundingClientRect().left;
     let painting = false;
+    let foreignPath = new Path2D();
+    let localPath = new Path2D();
     function startPosition(e) {
+      console.log('call to start position')
       painting = true;
       draw(e);
 
@@ -31,34 +34,42 @@ export default class Canvas extends Component {
       socket.emit('down', { down: true, x, y });
     }
     function finishedPosition() {
+      console.log("call to finished position")
       painting = false;
       ctx.beginPath();
+      localPath = new Path2D();
       socket.emit('down', { down: false });
     }
 
     const draw = (e) => {
+      console.log('call to draw')
       if (!painting) return;
       ctx.lineWidth = this.state.color === 'grey' ? 20 : this.state.thickness;
       ctx.lineCap = 'round';
       ctx.strokeStyle = this.state.color;
-      ctx.lineTo(e.clientX - fromLeft, e.clientY - fromTop);
-      ctx.stroke();
+      localPath.lineTo(e.clientX - fromLeft, e.clientY - fromTop);
+      ctx.stroke(localPath);
       ctx.beginPath();
-      ctx.moveTo(e.clientX - fromLeft, e.clientY - fromTop);
-
+      localPath.moveTo(e.clientX - fromLeft, e.clientY - fromTop);
+    
       const x = (e.clientX - fromLeft) / canvas.width;
       const y = (e.clientY - fromTop) / canvas.height;
 
       socket.emit('mouse', { x, y, color: this.state.color, thickness: this.state.thickness });
     };
+    
     canvas.addEventListener('mousedown', startPosition);
     canvas.addEventListener('mouseup', finishedPosition);
     canvas.addEventListener('mousemove', draw);
     let down = false;
     socket.on('down', (data) => {
       down = data.down;
-      if (!data.down) ctx.beginPath();
-      else down2(data);
+      // if (!data.down) ctx.beginPath();
+      // else down2(data);
+
+      foreignPath = new Path2D();
+
+      if(data.down) down2(data);
     });
     socket.on('mouseback', down2);
     function down2(data) {
@@ -66,15 +77,20 @@ export default class Canvas extends Component {
       ctx.lineWidth = data.color === 'grey' ? 20 : data.thickness;
       ctx.lineCap = 'round';
       ctx.strokeStyle = data.color;
-
-      ctx.lineTo(data.x * canvas.width, data.y * canvas.height);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(data.x * canvas.width, data.y * canvas.height);
+      
+      // foreignPath.color = 'blue';
+      foreignPath.lineTo(data.x * canvas.width, data.y * canvas.height);
+      
+      //ctx.lineTo(data.x * canvas.width, data.y * canvas.height);
+      ctx.stroke(foreignPath);
+      //ctx.beginPath();
+      //ctx.moveTo(data.x * canvas.width, data.y * canvas.height);
+      foreignPath.moveTo(data.x * canvas.width, data.y * canvas.height)
     }
 
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      foreignPath = new Path2D();
     }
 
     const clearButton = document.getElementById('clear');
