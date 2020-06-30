@@ -30,7 +30,7 @@ githubController.callback = (req, res, next) => {
 
 githubController.setCookie = (req, res, next) => {
   // const token = res.locals.token;
-  res.cookie('token', 'iseeyou');
+  res.cookie('token', 'iseeyou', { expires: new Date(Date.now() + 300000) });
   next();
 };
 
