@@ -12,6 +12,7 @@ export default class Canvas extends Component {
     this.state = { color: 'black', thickness: 3 };
     this.socket = null;
     this.canvas = null;
+    this.pathArray = [];
     this.ctx = null;
     this.fromTop = null;
     this.fromLeft = null;
@@ -26,6 +27,7 @@ export default class Canvas extends Component {
     this.draw = this.draw.bind(this);
     this.down2 = this.down2.bind(this);
     this.clearCanvas = this.clearCanvas.bind(this);
+    this.undoButton = this.undoButton.bind(this);
   }
 
   startPosition(e) {
@@ -39,11 +41,41 @@ export default class Canvas extends Component {
   }
   finishedPosition() {
     this.painting = false;
+    this.pathArray.push({path: this.localPath, thickness: this.state.thickness, color: this.state.color});
     this.ctx.beginPath();
     this.localPath = new Path2D();
+
+    // creating a clone, pushing that into array
+    // continue drawing on current canvas
+    // const cloneCanvas = this.canvas.cloneNode(true);
+
+    // //make an html canvas element
+    // const newCanvas = document.createElement('canvas');
+    // //newCanvas.setAttribute('style', 'background')
+    // newCanvas.style.backgroundColor = 'grey';
+    // newCanvas.height = window.innerHeight * 0.8;
+    // newCanvas.width = this.canvas.height * 1.5;
+    // //make a context for that canvas element
+    // const context = newCanvas.getContext('2d');
+    // //write the current canvas to the context
+    // //context.drawImage(this.canvas, 0, 0,);
+    // //store the canvas element in the array 
+
+    // // this.fromTop = this.canvas.getBoundingClientRect().top;
+    // // this.fromLeft = this.canvas.getBoundingClientRect().left;
+
+    // Overview 
+      // Every time we create a new path, we store that path inside an array.
+
+      // When the user hits the undo button, we use clearRect to empty the context and then
+      // we draw everything up to the current path.
+
+
+    // this.canvasArray.push(newCanvas);
     this.socket.emit('down', { down: false });
   }
   draw(e) {
+    console.log("call to draw")
     if (!this.painting) return;
     this.ctx.lineWidth = this.state.color === 'grey' ? 20 : this.state.thickness;
     this.ctx.lineCap = 'round';
@@ -52,24 +84,32 @@ export default class Canvas extends Component {
     this.ctx.stroke(this.localPath);
     this.ctx.beginPath();
     this.localPath.moveTo(e.clientX - this.fromLeft, e.clientY - this.fromTop);
-  
     const x = (e.clientX - this.fromLeft) / this.canvas.width;
     const y = (e.clientY - this.fromTop) / this.canvas.height;
 
-    this.socket.emit('mouse', { x, y, color: this.state.color, thickness: this.state.thickness });
+    this.socket.emit('mouse', { x, y, color: this.state.color, thickness: this.state.thickness, path: this.localPath });
   };
 
   down2(data) {
     if (!this.down) return;
+
+    if(data.x === null || data.y === null) {
+      console.log('data', data);
+      this.ctx.stroke(data.path);
+      return;
+    }
+
     this.ctx.lineWidth = data.color === 'grey' ? 20 : data.thickness;
     this.ctx.lineCap = 'round';
     this.ctx.strokeStyle = data.color;
     
+
     // foreignPath.color = 'blue';
     this.foreignPath.lineTo(data.x * this.canvas.width, data.y * this.canvas.height);
     
     //ctx.lineTo(data.x * canvas.width, data.y * canvas.height);
     this.ctx.stroke(this.foreignPath);
+    // this.pathArray.push(this.foreignPath);
     //ctx.beginPath();
     //ctx.moveTo(data.x * canvas.width, data.y * canvas.height);
     this.foreignPath.moveTo(data.x * this.canvas.width, data.y * this.canvas.height)
@@ -85,11 +125,12 @@ export default class Canvas extends Component {
     this.socket = io.connect('http://localhost:3000');
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
+    
     this.canvas.height = window.innerHeight * 0.8;
     this.canvas.width = this.canvas.height * 1.5;
+
     this.fromTop = this.canvas.getBoundingClientRect().top;
     this.fromLeft = this.canvas.getBoundingClientRect().left;
- 
 
     this.canvas.addEventListener('mousedown', this.startPosition);
     this.canvas.addEventListener('mouseup', this.finishedPosition);
@@ -115,12 +156,38 @@ export default class Canvas extends Component {
     if (sign === '-' && this.state.thickness > 1)
       this.setState({ ...this.state, thickness: this.state.thickness - 2 });
   }
+  undoButton() {
+    console.log('call to undo button')
+    // let wrapper = document.getElementById('canvasElement');
+    // wrapper.removeChild(wrapper.childNodes[0]);
+    // this.canvas = this.canvasArray.pop();
+    // this.canvas.setAttribute('id', 'old canvas');
+    // this.ctx = this.canvas.getContext('2d')
+    // wrapper.appendChild(this.canvas);
+    this.clearCanvas();
+
+    this.pathArray.pop();
+    console.log('sending out data', {down: true, path: this.pathArray[0].path});
+    // this.socket.emit('down', {down: true, path: this.pathArray[0].path});
+    for (let i = 0; i < this.pathArray.length; i += 1) {
+      this.ctx.strokeStyle = this.pathArray[i].color;
+      this.ctx.lineWidth = this.pathArray[i].thickness;
+      this.ctx.lineCap = 'round';
+      this.ctx.stroke(this.pathArray[i].path);
+      // this.socket.emit('down', { down: true, x: null, y: null, color: this.pathArray[i].color, thickness: this.pathArray[i].thickness, path: this.pathArray[i].path });
+     // console.log('thickness at localpath object', this.pathArray[i]);
+      // this.socket.emit('mouse', { x: null, y: null, color: this.pathArray[i].color, thickness: this.pathArray[i].thickness, path: this.pathArray[i].path });
+    }
+    this.socket.emit('down',{down: false})
+  }
 
   render() {
     return (
       <div className='canvas-page'>
         <div>
-            <canvas id="canvas" style={{ backgroundColor: 'gray' }} />
+            <div id='canvasElement'>
+              <canvas id="canvas" style={{ backgroundColor: 'gray' }} />
+            </div>
             <div className='button-div'>
             <button
               id="black"
@@ -172,6 +239,12 @@ export default class Canvas extends Component {
                 this.clearCanvas();
                 this.socket.emit('clear');
               }}>clear</button>
+            <button id="undo" onClick={() => {
+                this.socket.emit('clear');
+                this.undoButton();      
+              }}>undo</button>
+            {/* <button id="redo" onClick={() => {
+              }}>redo</button> */}
             </div>
           </div>
         <div >
