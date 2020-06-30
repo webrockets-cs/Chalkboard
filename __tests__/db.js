@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 /*
     Unit Tests for User database
-
     Insert into Database Successfully (Test Normal Case)
     Insert into Database with no Invalid Field (Test on Schema)
     Insert User without Required Field (Test on Validation)
@@ -42,18 +41,27 @@ describe('insert', () => {
     users.deleteOne({ _id: insertedUser._id });
   });
 
-  it('should insert a user successfully, but the fields not defined in schema should be undefined', async () => {
+  it('should insert a user successfully, but have all required fields', async () => {
     const users = db.collection('users');
 
     const InvalidData = {
       username: 'testingwithrandomhash-5632428824',
-      password: 'lol',
-      random: 'true',
-      hash: 54,
     };
 
-    let userWithInvalidData = await users.insertOne(InvalidData);
+    const userWithInvalidData = await users.insertOne(InvalidData);
+
     //we dont want this to go through
-    console.log(userWithInvalidData);
+    expect(userWithInvalidData.username).toEqual(undefined);
+    users.deleteOne({ username: userWithInvalidData.ops[0].username });
+  });
+
+  it('should not insert a user with no fields into collection', async () => {
+    const users = db.collection('users');
+
+    const InvalidData = {};
+
+    //const userWithNoData = await users.insertOne(InvalidData);
+
+    //we dont want this to go through
   });
 });
