@@ -35,9 +35,10 @@ class Login extends Component {
           <input type='button' value='Log In' id="login"/>  
         {/* </form> */}
         <input type="button" id="signup" name="signup" value="Sign up" />
+        <br></br>
+        <a href='/auth/user' className='githubLogin'>Log in with Github</a>
         {/* path="/login" render={(routeProps) => (
         <Login onLogged={ this.onLogged } */}
-
       </div>
     )
   }

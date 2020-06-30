@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const userController = require('../server/controllers/userController');
+const githubRouter = require('./githubRouter.js')
 
 const app = express();
 const PORT = 3000;
@@ -29,7 +30,11 @@ mongoose.connection.once('open', () => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.use('/auth', githubRouter)
+
 app.use('/asset', express.static(path.join(__dirname, '../client/asset')));
+
+app.use('/build', express.static(path.join(__dirname, '../build')))
 
 app.get('*', (req, res) => {
   console.log('inside the catchall no matching routes');
@@ -38,6 +43,9 @@ app.get('*', (req, res) => {
 
 app.post('/signup', userController.createUser);
 app.post('/login', userController.verifyUser);
+app.use('/login', (err, res) => {
+  res.status(200).json({ logStatus: true })
+});
 
 const server = app.listen(PORT, () => {
   console.log(`listening on ${PORT}`);
