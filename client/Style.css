@@ -138,13 +138,14 @@ body{
 
 }
 .chat{
-
+  /* background-color: rgb(142, 171, 172); */
 }
 .chat-box{
 height: 400px;
 }
 .indivMessage{
-
+  font-family: "Gill Sans", sans-serif;
+  padding: 5px;
 }
 .nav-elem{
 
@@ -159,6 +160,77 @@ height: 400px;
 
 }
 
+.chatInput{
+}
+
+.githubLogin {
+  /* display:inline-block;
+  height:23px;
+  padding:0 0 0 3px;
+  font-size:15px;
+  font-weight:bold;
+  color:#333;
+  text-shadow:1px 1px 0 #fff; 
+  background:grey;
+  white-space:nowrap;
+  border:none;
+  overflow:visible;
+  cursor:pointer;
+  text-decoration:none;  */
+}
+
+svg{
+}
+
+path{
+  margin: auto;
+}
+
+.githubLogo{
+  width:45px;
+  height:45px;
+  display:inline-flex;
+  vertical-align:top;
+  justify-content:center;
+  align-items:center;
+  padding-right: 5px;
+}
+
+
+a.githubLogin:link, a.githubLogin:visited {
+  color: white;
+  padding: 14px 25px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  background-color: black;
+  border-radius: 10px;
+}
+
+
+.githubLink{
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.chatInput #submit{
+  box-shadow: 0px 0px 0px 2px #9fb4f2;
+	background-color:#4977ce;
+	border-radius:5px;
+	border:1px solid #4e6096;
+  margin-top: 15px;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+  padding: auto;
+  margin-bottom: 5px;
+  margin-right: 15px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #283966;
+}
+
 .form{
   margin-left: 50%;
   padding-top: 20px;
@@ -171,10 +243,10 @@ height: 400px;
   font-family: 'Cabin', sans-serif;
   color:balck;
   background-color: cadetblue;
- border: 2px;
-border-radius: 3%;
-border-color: cadetblue;
-width: 300px;
+  border: 2px;
+  border-radius: 3%;
+  border-color: cadetblue;
+  width: 300px;
 }
 .profile{
   
@@ -206,6 +278,7 @@ width: 300px;
 }
 
 .login {
+  
 	box-shadow: 0px 0px 0px 2px #9fb4f2;
 	background-color:#4977ce;
 	border-radius:5px;
