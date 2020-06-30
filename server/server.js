@@ -1,13 +1,14 @@
 const path = require('path');
 const express = require('express');
 const userController = require('../server/controllers/userController');
+const githubRouter = require('./githubRouter.js')
 
 const app = express();
 const PORT = 3000;
 
 // --------- database connection ------
 const mongoose = require('mongoose');
-const databaseURL = "";
+const databaseURL = "mongodb+srv://testUsername:testPassword@cluster0-rfgdc.mongodb.net/<testDB>?retryWrites=true&w=majority C";
 // replce databaseURL with your database key/link
 mongoose.connect(databaseURL, { useNewUrlParser: true });
 mongoose.connection.on('error', console.error.bind(console, 'connection error:'));
@@ -23,6 +24,8 @@ mongoose.connection.once('open', () => {
 // parsing requests
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/auth', githubRouter)
 
 app.use('/asset', express.static(path.join(__dirname, '../client/asset')));
 
