@@ -9,12 +9,13 @@ module.exports = {
   },
 
   devServer: {
-    contentBase: '/',
+    // contentBase: '/',
     proxy: {
       '/': 'http://localhost:3000',
     },
+    publicPath: '/build/'
 
-    publicPath: 'http://localhost:8080/build/',
+    // publicPath: 'http://localhost:8080/build/',
 
     // publicPath: 'http://localhost:8080/build/',
     // publicPath: '/',

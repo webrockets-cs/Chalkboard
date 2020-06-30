@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Login from './component/logedIn/Login';
 import Canvas from './component/logedIn/canvas.jsx';
 import Home from './component/logedIn/home'
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -57,8 +58,11 @@ class App extends Component {
 
   render() {
     let renderCanvas;
+    let authorized = document.cookie.split(';').some((item) => item.trim().startsWith('token='));
+    // let canvas = <Canvas />
+    // let renderCanvas_2 = <Route path='/canvas' component = { canvas }/>
     if (this.state.logStatus) {
-      renderCanvas = <Canvas />
+       renderCanvas = <Canvas />
     };
 
     let renderLogin;
@@ -78,6 +82,12 @@ class App extends Component {
         <div>
           <NavBar/>
           <Switch>
+          {/* <Route exact path='/canvas'>
+              {authorized ? <Canvas /> : <Login onSignUp={this.onSignUp}  onLogged={ this.onLogged }/>}
+            </Route> */}
+            <Route exact path='/canvas'>
+              {<Canvas />}
+            </Route>
             {/* <Route path="/login"  component={Login} /> */}
             { renderLogin }
             {/* <Route path="/canvas"  component={Canvas}/> */}
