@@ -7,7 +7,7 @@
     "start": "cross-env NODE_ENV=production nodemon server/server.js",
     "build": "cross-env NODE_ENV=production webpack",
     "dev": "cross-env NODE_ENV=development concurrently \"webpack-dev-server --open\"  \"nodemon server/server.js\"",
-    "test": "jest"
+    "test": "cross-env NODE_ENV=development concurrently \"webpack-dev-server --open\"  \"nodemon server/server.js\" & jest"
   },
   "author": "",
   "license": "ISC",
