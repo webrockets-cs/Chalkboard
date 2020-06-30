@@ -10,103 +10,105 @@ export default class Canvas extends Component {
   constructor(props) {
     super(props);
     this.state = { color: 'black', thickness: 3 };
+    this.socket = null;
+    this.canvas = null;
+    this.ctx = null;
+    this.fromTop = null;
+    this.fromLeft = null;
+    this.painting = false;
+    this.foreignPath = new Path2D();
+    this.localPath = new Path2D();
+    this.down = false;
+
+    //bind methods
+    this.startPosition = this.startPosition.bind(this);
+    this.finishedPosition = this.finishedPosition.bind(this);
+    this.draw = this.draw.bind(this);
+    this.down2 = this.down2.bind(this);
+    this.clearCanvas = this.clearCanvas.bind(this);
+  }
+
+  startPosition(e) {
+    this.painting = true;
+    this.draw(e);
+
+    const x = (e.clientX - this.fromLeft) / this.canvas.width;
+    const y = (e.clientY - this.fromTop) / this.canvas.height;
+
+    this.socket.emit('down', { down: true, x, y });
+  }
+  finishedPosition() {
+    this.painting = false;
+    this.ctx.beginPath();
+    this.localPath = new Path2D();
+    this.socket.emit('down', { down: false });
+  }
+  draw(e) {
+    if (!this.painting) return;
+    this.ctx.lineWidth = this.state.color === 'grey' ? 20 : this.state.thickness;
+    this.ctx.lineCap = 'round';
+    this.ctx.strokeStyle = this.state.color;
+    this.localPath.lineTo(e.clientX - this.fromLeft, e.clientY - this.fromTop);
+    this.ctx.stroke(this.localPath);
+    this.ctx.beginPath();
+    this.localPath.moveTo(e.clientX - this.fromLeft, e.clientY - this.fromTop);
+  
+    const x = (e.clientX - this.fromLeft) / this.canvas.width;
+    const y = (e.clientY - this.fromTop) / this.canvas.height;
+
+    this.socket.emit('mouse', { x, y, color: this.state.color, thickness: this.state.thickness });
+  };
+
+  down2(data) {
+    if (!this.down) return;
+    this.ctx.lineWidth = data.color === 'grey' ? 20 : data.thickness;
+    this.ctx.lineCap = 'round';
+    this.ctx.strokeStyle = data.color;
+    
+    // foreignPath.color = 'blue';
+    this.foreignPath.lineTo(data.x * this.canvas.width, data.y * this.canvas.height);
+    
+    //ctx.lineTo(data.x * canvas.width, data.y * canvas.height);
+    this.ctx.stroke(this.foreignPath);
+    //ctx.beginPath();
+    //ctx.moveTo(data.x * canvas.width, data.y * canvas.height);
+    this.foreignPath.moveTo(data.x * this.canvas.width, data.y * this.canvas.height)
+  }
+
+  clearCanvas() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.foreignPath = new Path2D();
   }
 
   componentDidMount() {
-    const socket = io.connect('http://localhost:3000');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.height = window.innerHeight * 0.8;
-    canvas.width = canvas.height * 1.5;
-    const fromTop = canvas.getBoundingClientRect().top;
-    const fromLeft = canvas.getBoundingClientRect().left;
-    let painting = false;
-    let foreignPath = new Path2D();
-    let localPath = new Path2D();
-    function startPosition(e) {
-      console.log('call to start position')
-      painting = true;
-      draw(e);
+    //initialize properties for the Canvas Class
+    this.socket = io.connect('http://localhost:3000');
+    this.canvas = document.getElementById('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.height = window.innerHeight * 0.8;
+    this.canvas.width = this.canvas.height * 1.5;
+    this.fromTop = this.canvas.getBoundingClientRect().top;
+    this.fromLeft = this.canvas.getBoundingClientRect().left;
+ 
 
-      const x = (e.clientX - fromLeft) / canvas.width;
-      const y = (e.clientY - fromTop) / canvas.height;
+    this.canvas.addEventListener('mousedown', this.startPosition);
+    this.canvas.addEventListener('mouseup', this.finishedPosition);
+    this.canvas.addEventListener('mousemove', this.draw);
 
-      socket.emit('down', { down: true, x, y });
-    }
-    function finishedPosition() {
-      console.log("call to finished position")
-      painting = false;
-      ctx.beginPath();
-      localPath = new Path2D();
-      socket.emit('down', { down: false });
-    }
 
-    const draw = (e) => {
-      console.log('call to draw')
-      if (!painting) return;
-      ctx.lineWidth = this.state.color === 'grey' ? 20 : this.state.thickness;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = this.state.color;
-      localPath.lineTo(e.clientX - fromLeft, e.clientY - fromTop);
-      ctx.stroke(localPath);
-      ctx.beginPath();
-      localPath.moveTo(e.clientX - fromLeft, e.clientY - fromTop);
-    
-      const x = (e.clientX - fromLeft) / canvas.width;
-      const y = (e.clientY - fromTop) / canvas.height;
-
-      socket.emit('mouse', { x, y, color: this.state.color, thickness: this.state.thickness });
-    };
-    
-    canvas.addEventListener('mousedown', startPosition);
-    canvas.addEventListener('mouseup', finishedPosition);
-    canvas.addEventListener('mousemove', draw);
-    let down = false;
-    socket.on('down', (data) => {
-      down = data.down;
-      // if (!data.down) ctx.beginPath();
-      // else down2(data);
-
-      foreignPath = new Path2D();
-
-      if(data.down) down2(data);
+    this.socket.on('down', (data) => {
+      this.down = data.down;
+      this.foreignPath = new Path2D();
+      if(data.down) this.down2(data);
     });
-    socket.on('mouseback', down2);
-    function down2(data) {
-      if (!down) return;
-      ctx.lineWidth = data.color === 'grey' ? 20 : data.thickness;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = data.color;
-      
-      // foreignPath.color = 'blue';
-      foreignPath.lineTo(data.x * canvas.width, data.y * canvas.height);
-      
-      //ctx.lineTo(data.x * canvas.width, data.y * canvas.height);
-      ctx.stroke(foreignPath);
-      //ctx.beginPath();
-      //ctx.moveTo(data.x * canvas.width, data.y * canvas.height);
-      foreignPath.moveTo(data.x * canvas.width, data.y * canvas.height)
-    }
-
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      foreignPath = new Path2D();
-    }
-
-    const clearButton = document.getElementById('clear');
-    console.log(clearButton);
-    clearButton.onclick = () => {
-      clearCanvas();
-      socket.emit('clear');
-    };
-
-    socket.on('clearBack', clearCanvas);
+    
+    this.socket.on('mouseback', this.down2);
+    // const clearButton = document.getElementById('clear');
+    this.socket.on('clearBack', this.clearCanvas);
   }
-
   changeColor(color) {
     this.setState({ ...this.state, color });
   }
-
   changeThickness(sign) {
     if (sign === '+' && this.state.thickness <= 20)
       this.setState({ ...this.state, thickness: this.state.thickness + 2 });
@@ -166,7 +168,10 @@ export default class Canvas extends Component {
             >
               -
             </button>
-            <button id="clear">clear</button>
+            <button id="clear" onClick={() => {
+                this.clearCanvas();
+                this.socket.emit('clear');
+              }}>clear</button>
             </div>
           </div>
         <div >

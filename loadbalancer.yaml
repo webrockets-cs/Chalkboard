@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-06-29T16:00:04Z"
+  labels:
+    app: web-rocket-server
+  name: loadbalancer
+  namespace: default
+  resourceVersion: "1361390"
+  selfLink: /api/v1/namespaces/default/services/loadbalancer
+  uid: e35908be-c845-4665-88c2-1a002a46e250
+spec:
+  clusterIP: 10.99.165.220
+  externalTrafficPolicy: Cluster
+  ports:
+    - nodePort: 31791
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: web-rocket-server
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer:
+    ingress:
+      - hostname: localhost

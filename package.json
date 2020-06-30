@@ -6,7 +6,8 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production nodemon server/server.js",
     "build": "cross-env NODE_ENV=production webpack",
-    "dev": "cross-env NODE_ENV=development concurrently \"webpack-dev-server --open\"  \"nodemon server/server.js\""
+    "dev": "cross-env NODE_ENV=development concurrently \"webpack-dev-server --open\"  \"nodemon server/server.js\"",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -33,9 +34,11 @@
     "@babel/core": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
     "@babel/preset-react": "^7.10.1",
+    "@shelf/jest-mongodb": "^1.1.5",
     "babel-loader": "^8.1.0",
     "css": "^2.2.4",
     "css-loader": "^3.6.0",
+    "jest": "^26.1.0",
     "nodemon": "^2.0.4",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
