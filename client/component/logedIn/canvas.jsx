@@ -44,11 +44,28 @@ export default class Canvas extends Component {
 
     // creating a clone, pushing that into array
     // continue drawing on current canvas
-    const cloneCanvas = this.canvas.cloneNode();
-    this.canvasArray.push(cloneCanvas);
+    // const cloneCanvas = this.canvas.cloneNode(true);
+
+    //make an html canvas element
+    const newCanvas = document.createElement('canvas');
+    //newCanvas.setAttribute('style', 'background')
+    newCanvas.style.backgroundColor = 'grey';
+    newCanvas.height = window.innerHeight * 0.8;
+    newCanvas.width = this.canvas.height * 1.5;
+    //make a context for that canvas element
+    const context = newCanvas.getContext('2d');
+    //write the current canvas to the context
+    //context.drawImage(this.canvas, 0, 0,);
+    //store the canvas element in the array 
+
+    // this.fromTop = this.canvas.getBoundingClientRect().top;
+    // this.fromLeft = this.canvas.getBoundingClientRect().left;
+
+    this.canvasArray.push(newCanvas);
     this.socket.emit('down', { down: false });
   }
   draw(e) {
+    console.log("call to draw")
     if (!this.painting) return;
     this.ctx.lineWidth = this.state.color === 'grey' ? 20 : this.state.thickness;
     this.ctx.lineCap = 'round';
@@ -89,11 +106,12 @@ export default class Canvas extends Component {
     this.socket = io.connect('http://localhost:3000');
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
+    
     this.canvas.height = window.innerHeight * 0.8;
     this.canvas.width = this.canvas.height * 1.5;
+
     this.fromTop = this.canvas.getBoundingClientRect().top;
     this.fromLeft = this.canvas.getBoundingClientRect().left;
- 
 
     this.canvas.addEventListener('mousedown', this.startPosition);
     this.canvas.addEventListener('mouseup', this.finishedPosition);
@@ -121,9 +139,14 @@ export default class Canvas extends Component {
   }
   undoButton() {
     console.log('call to undo button')
+    console.log(this.canvasArray);
     let wrapper = document.getElementById('canvasElement');
     wrapper.removeChild(wrapper.childNodes[0]);
-    wrapper.appendChild(this.canvasArray.pop())
+    this.canvas = this.canvasArray.pop();
+    this.canvas.setAttribute('id', 'old canvas');
+    this.ctx = this.canvas.getContext('2d')
+    wrapper.appendChild(this.canvas);
+    console.log(this.canvasArray);
   }
 
   render() {
