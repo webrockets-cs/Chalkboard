@@ -4,7 +4,7 @@ const { redirect, callback, setCookie } = require('./controllers/githubControlle
 router.get('/user', redirect);
 
 router.get('/callback', callback, setCookie, (req, res) => {
-  res.status(200).redirect('.0.0.0.8080');
+  res.status(200).redirect('http://localhost:8080/canvas');
 })
 
 module.exports = router;

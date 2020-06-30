@@ -82,12 +82,12 @@ class App extends Component {
         <div>
           <NavBar/>
           <Switch>
-          {/* <Route exact path='/canvas'>
+          <Route exact path='/canvas'>
               {authorized ? <Canvas /> : <Login onSignUp={this.onSignUp}  onLogged={ this.onLogged }/>}
-            </Route> */}
-            <Route exact path='/canvas'>
-              {<Canvas />}
             </Route>
+            {/* <Route exact path='/canvas'>
+              {<Canvas />}
+            </Route> */}
             {/* <Route path="/login"  component={Login} /> */}
             { renderLogin }
             {/* <Route path="/canvas"  component={Canvas}/> */}
